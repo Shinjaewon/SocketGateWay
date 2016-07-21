@@ -1,6 +1,7 @@
 plugins {
   id 'java'
   id 'application'
+  id 'eclipse'
   id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
@@ -10,15 +11,27 @@ repositories {
 
 version = '3.3.2'
 sourceCompatibility = '1.8'
+mainClassName = 'io.vertx.main.NxmileGateWayMain'
 
 dependencies {
   compile "io.vertx:vertx-core:$version"
 }
 
-mainClassName = 'io.vertx.main.NxmileGateWayMain'
+mainClassName = 'io.vertx.core.Launcher'
+def mainVerticleName = 'io.vertx.main.NxmileGateWayMain'
+def watchForChange = 'src/**/*.java'
+// Vert.x will call this task on changes
+def doOnChange = './gradlew classes'
+
+run {
+  args = ['run', mainVerticleName,"-conf ./src/main/java/io/vertx/main/conf.json" ,"--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+}
 
 shadowJar {
   classifier = 'fat'
+  manifest {
+    attributes 'Main-Verticle': mainVerticleName
+  }
   mergeServiceFiles {
     include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
   }
@@ -27,3 +40,4 @@ shadowJar {
 task wrapper(type: Wrapper) {
   gradleVersion = '2.8'
 }
+

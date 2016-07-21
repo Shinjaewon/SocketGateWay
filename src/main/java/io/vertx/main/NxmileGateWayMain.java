@@ -1,24 +1,36 @@
 package io.vertx.main;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
 
-public class NxmileGateWayMain {
+public class NxmileGateWayMain extends AbstractVerticle  {
 
 	private static final Logger log = LoggerFactory.getLogger(NxmileGateWayMain.class);
-	public static void main(String[] args) { 
-	 
-	    Vertx vertx = Vertx.vertx(); 
+	
+	@Override
+	public void start() throws Exception { 
+
+		JsonObject config = context.config();
+		String serverIp = config.getString("serverIp");
+		int serverPort = Integer.valueOf(config.getString("serverPort"));
+		String gateWayClientIp = config.getString("gateWayClientIp");
+		int gateWayClientPort = Integer.valueOf(config.getString("gateWayClientPort"));
+		
+		System.out.println(serverIp + "|||" + serverPort + "|||" + gateWayClientIp);
+		
+	    log.info("-------------------START---------------------");
 	    NetServer server = vertx.createNetServer(
-    	      new NetServerOptions().setPort(19006).setHost("127.0.0.1")
+    	      new NetServerOptions().setPort(serverPort).setHost(serverIp)
 	    );
 	    server.connectHandler(sock -> {
-	    	System.out.println("Server to connected");
+	    	log.info("-------------------SERVER CONNECTED---------------------");
+	    	
 	    	Buffer requestBufferData = Buffer.buffer();
 	    	Buffer resultBufferData = Buffer.buffer();
 		    sock.handler(requestBuffers -> {
@@ -26,7 +38,7 @@ public class NxmileGateWayMain {
 		    		requestBufferData.appendBuffer(requestBuffers);
 		    		int requestBodyLen = Integer.parseInt(new String(requestBufferData.getBytes(), 34, 4));
 		    		if (requestBodyLen + 50 == requestBufferData.length()) {
-		    			vertx.createNetClient().connect(19008, "127.0.0.1", res -> {
+		    			vertx.createNetClient().connect(gateWayClientPort, gateWayClientIp, res -> {
 		    				if (res.succeeded()) {
 		    					System.out.println("res to connected");
 		    					NetSocket socket = res.result();
