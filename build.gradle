@@ -15,6 +15,7 @@ mainClassName = 'io.vertx.main.NxmileGateWayMain'
 
 dependencies {
   compile "io.vertx:vertx-core:$version"
+  compile "org.apache.commons:commons-lang3:3.0"
 }
 
 mainClassName = 'io.vertx.core.Launcher'
@@ -24,7 +25,7 @@ def watchForChange = 'src/**/*.java'
 def doOnChange = './gradlew classes'
 
 run {
-  args = ['run', mainVerticleName,"-conf ./src/main/java/io/vertx/main/conf.json" ,"--redeploy=$watchForChange", "--launcher-class=$mainClassName", "--on-redeploy=$doOnChange"]
+  args = ['run', mainVerticleName ]
 }
 
 shadowJar {

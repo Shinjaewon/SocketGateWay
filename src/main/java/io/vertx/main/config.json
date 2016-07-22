@@ -1,0 +1,6 @@
+{
+  "serverIp": "127.0.0.1",
+  "serverPort": "19006",
+  "gateWayClientIp": "127.0.0.1",
+  "gateWayClientPort": "19008"
+}
