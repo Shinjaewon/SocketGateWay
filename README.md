@@ -1,6 +1,6 @@
-# SocketGateway
+# NxmileGateWay
 
-로컬과 SocketGateway를 설치한 개발서버 방화벽만 오픈 하면 로컬에서 Nxmile Socket연동을 할 수 있다. 
+로컬과 개발서버(NxmileGateWay 실행) 방화벽만 오픈 하면 로컬에서 Nxmile Socket연동을 할 수 있다. 
 
 ```로컬 - 개발(SocketGateway) - Nxmile``` 중간에서 게이트웨이 역활을 해준다. 
 
