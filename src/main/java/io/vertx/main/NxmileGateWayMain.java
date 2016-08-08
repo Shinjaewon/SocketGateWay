@@ -3,7 +3,6 @@ package io.vertx.main;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.NetServer;
@@ -21,49 +20,51 @@ public class NxmileGateWayMain extends AbstractVerticle  {
 
 		NxmileGateWayConfig config = new NxmileGateWayConfig(context.config());
 
-		System.out.println(config.getServerIp() + "|||" + config.getServerPort());
+		log.info(config.getServerIp() + ":" + config.getServerPort());
 		
-	    log.info("-------------------START---------------------");
-	    NetServer server = vertx.createNetServer(
+	    log.info("-------------------SERVER START---------------------");
+	    NetServer gateWayServer = vertx.createNetServer(
     	      new NetServerOptions().setPort(config.getServerPort()).setHost(config.getServerIp())
 	    );
-	    server.connectHandler(sock -> {
+	    gateWayServer.connectHandler(requestClient -> {
 	    	log.info("-------------------SERVER CONNECTED---------------------");
 	    	
 	    	Buffer requestBufferData = Buffer.buffer();
 	    	Buffer resultBufferData = Buffer.buffer();
-		    sock.handler(requestBuffers -> {
-		    	if (!sock.writeQueueFull()) {
-		    		requestBufferData.appendBuffer(requestBuffers);
+		    requestClient.handler(serverRequestBuffers -> {
+		    	if (!requestClient.writeQueueFull()) {
+		    		requestBufferData.appendBuffer(serverRequestBuffers);
 		    		int requestBodyLen = Integer.parseInt(new String(requestBufferData.getBytes(), 34, 4));
 		    		if (requestBodyLen + 50 == requestBufferData.length()) {
-		    			vertx.createNetClient().connect(config.getGateWayClientPort(), config.getGateWayClientIp(), res -> {
-		    				if (res.succeeded()) {
-		    					System.out.println("res to connected");
-		    					NetSocket socket = res.result();
-		    					socket.handler(resultBuffers -> {
-		    						resultBufferData.appendBuffer(resultBuffers);
+		    			vertx.createNetClient().connect(config.getGateWayClientPort(), config.getGateWayClientIp(), targetClient -> {
+		    				if (targetClient.succeeded()) {
+		    					log.info("targetClient to connected");
+		    					NetSocket targetClientSocket = targetClient.result();
+		    					targetClientSocket.handler(tagetClientResultBuffers -> {
+		    						resultBufferData.appendBuffer(tagetClientResultBuffers);
 		    						int resultBufferLen = Integer.parseInt(new String(resultBufferData.getBytes(), 34, 4));
 		    						if (resultBufferLen + 50 == resultBufferData.length()){
-		    							System.out.println("resultBufferData ::" + resultBufferData.getString(0, resultBufferData.length()));
-		    							sock.write(resultBufferData);
+		    							log.info("resultBufferData ::" + resultBufferData.getString(0, resultBufferData.length()));
+		    							requestClient.write(resultBufferData);
 		    						}
 		    					});
-		    					System.out.println("requestBufferData ::" + requestBufferData.getString(0, requestBufferData.length()));
-		    					socket.write(requestBufferData);
+		    					log.info("requestBufferData ::" + requestBufferData.getString(0, requestBufferData.length()));
+		    					targetClientSocket.write(requestBufferData);
 		    				}else{
-		    					System.out.println("Socket Failed to  connect");
+		    					log.info("targetClient Failed to  connect");
 		    				}
 		    				
 		    			});
 		    		}
 		    	} else {
-		    		System.out.println("Sock Failed to connect");
+		    		log.info("GateWayServer Failed to Send");
 		    	}
 		    });
 	    }).listen();
 	}
-	 public static void main(String[] args) {
+	
+	
+	public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(new NxmileGateWayMain());
     }
