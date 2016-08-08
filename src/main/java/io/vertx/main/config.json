@@ -1,6 +1,6 @@
 {
-  "serverIp": "127.0.0.1",
-  "serverPort": "19006",
-  "gateWayClientIp": "127.0.0.1",
-  "gateWayClientPort": "19008"
+  "targetServerIp": "127.0.0.1",
+  "targetServerPort": "19006",
+  "gateWayServerIp": "127.0.0.1",
+  "gateWayServerPort": "19008"
 }

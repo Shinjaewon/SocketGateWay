@@ -20,11 +20,11 @@ public class NxmileGateWayMain extends AbstractVerticle  {
 
 		NxmileGateWayConfig config = new NxmileGateWayConfig(context.config());
 
-		log.info(config.getServerIp() + ":" + config.getServerPort());
+		log.info(config.getTargetServerIp() + ":" + config.getTargetServerPort());
 		
 	    log.info("-------------------SERVER START---------------------");
 	    NetServer gateWayServer = vertx.createNetServer(
-    	      new NetServerOptions().setPort(config.getServerPort()).setHost(config.getServerIp())
+    	      new NetServerOptions().setPort(config.getGateWayServerPort()).setHost(config.getGateWayServerIp())
 	    );
 	    gateWayServer.connectHandler(requestClient -> {
 	    	log.info("-------------------SERVER CONNECTED---------------------");
@@ -36,7 +36,7 @@ public class NxmileGateWayMain extends AbstractVerticle  {
 		    		requestBufferData.appendBuffer(serverRequestBuffers);
 		    		int requestBodyLen = Integer.parseInt(new String(requestBufferData.getBytes(), 34, 4));
 		    		if (requestBodyLen + 50 == requestBufferData.length()) {
-		    			vertx.createNetClient().connect(config.getGateWayClientPort(), config.getGateWayClientIp(), targetClient -> {
+		    			vertx.createNetClient().connect(config.getTargetServerPort(), config.getTargetServerIp(), targetClient -> {
 		    				if (targetClient.succeeded()) {
 		    					log.info("targetClient to connected");
 		    					NetSocket targetClientSocket = targetClient.result();
